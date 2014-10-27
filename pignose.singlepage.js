@@ -3,7 +3,7 @@
 *  - PIGNOSE SinglePage JS
 *  - DATE    2014-10-22
 *  - AUTHOR  PIGNOSE
-*  - VERSION 0.0.1
+*  - VERSION 0.0.3
 *  - LICENCE MIT
 *
 ****************************************/
@@ -13,8 +13,8 @@
 	var _config = {
 		name:       'PIGNOSE SinglePage JS',
 		createDate: '2014-10-22',
-		updateDate: '2014-10-23',
-		version:    '0.0.2',
+		updateDate: '2014-10-27',
+		version:    '0.0.3',
 		author:     'kenneth ceyer',
 		email:      'kennethan@nhpcw.com',
 		dev:        {
@@ -104,14 +104,14 @@
 				_interface._throw('target element is not found.', 1001);
 			}
 
-			opt.padding.top    = parseInt(opt.padding.top);
-			opt.padding.right  = parseInt(opt.padding.right);
-			opt.padding.bottom = parseInt(opt.padding.bottom);
-			opt.padding.left   = parseInt(opt.padding.left);
+			opt.padding.top    = parseInt(opt.padding.top     || 0);
+			opt.padding.right  = parseInt(opt.padding.right   || 0);
+			opt.padding.bottom = parseInt(opt.padding.bottom) || 0;
+			opt.padding.left   = parseInt(opt.padding.left    || 0);
 			
 			// Apply rendering to the all sections.
 			_config.plugin.itemSections   = $this.find(opt.section), $window = $(window), $document = $(document);
-			_config.plugin.oldSection = _config.plugin.currentSection = _config.plugin.itemSections.eq(_config.plugin.active);
+			_config.plugin.oldSection     = _config.plugin.currentSection = _config.plugin.itemSections.eq(_config.plugin.active);
 			_config.plugin.wrapperSection = $this;
 			_config.plugin.count          = _config.plugin.itemSections.length;
 			_interface.extend(opt);
@@ -123,7 +123,7 @@
 			 var s = (document.body || document.documentElement).style, $window = $(window), $document = $(document);
 			 _config.plugin.supportCss3 = (s.transition !== undefined || s.WebkitTransition !== undefined || s.MozTransition !== undefined || s.MsTransition !== undefined || s.OTransition !== undefined);
 			_interface._bind($window, 'load', function() {
-				_interface.setPage.call(_config.plugin.itemSections, opt);
+				$window.triggerHandler('resize');
 			});
 
 			if(!$.isFunction($.easing[opt.animateEasing])) {
@@ -154,7 +154,7 @@
 							}
 						}
 						else {
-							this.onmousewheel = b
+							this.onmousewheel = b;
 						}
 					},
 					teardown : function() {
@@ -179,7 +179,8 @@
 				});
 
 				function b(f) {
-					var d = [].slice.call(arguments, 1), g = 0, e = true;
+					
+					var d = [].slice.call(arguments, 1), g = 0, e = true, f = f || window.event;
 					if (f.wheelDelta) {
 						g = f.wheelDelta / 120
 					}
@@ -230,6 +231,7 @@
 			});
 
 			_interface._bind($window, 'resize', function(event) {
+				_config.plugin.oldActive = _config.plugin.active;
 				_interface.setPage.call(_config.plugin.itemSections, opt);
 				_interface._excute(opt.onResize, _config.plugin);
 			});
@@ -253,7 +255,7 @@
 			});
 
 			_this.css({
-				overflow:  'hidden',
+				overflow:  'hidden'
 			});
 
 			if(_config.plugin.supportCss3 === true && opt.useCss3 === true) {
@@ -321,7 +323,6 @@
 			_interface._excute(opt.onBeforeScroll, _config.plugin);
 			targetTop = _config.plugin.currentSection.position().top;
 			diffOrigin = targetTop - oldTop;
-			console.log(_config.plugin.currentSection);
 
 			if(_config.plugin.supportCss3 === true && opt.useCss3 === true) {
 				_config.plugin.staticScrollTop = targetTop += _config.plugin.scrollTop;
@@ -352,7 +353,6 @@
 						else {
 							_config.plugin.relativePercent = -offsetOrig;
 						}
-						console.log(_config.plugin.relativeScrollTop / _config.plugin.currentSection.outerHeight(), _config.plugin.relativePercent);
 						diffTop = (targetTop - oldTop) * p;
 						_interface._excute(opt.onPaging, _config.plugin);
 						if(opt.parallaxBackground === true) {
@@ -377,14 +377,15 @@
 			var _this = this, $window = $(window);
 			_this.each(function() {
 				var $this = $(this), _width = $window.width(), _height = $window.height();
+				$this.css({width: '', minWidth: '', height: '', minHeight: '', paddingTop: opt.padding.top, paddingBottom: opt.padding.bottom});
 				if(opt.leastHeight === true) {
 					var targetHeight = Math.min(_height, $this.outerHeight()), _padding = (_height - targetHeight) / 2;
 					$this.css({
 						paddingTop:    opt.padding.top    + _padding,
 						paddingBottom: opt.padding.bottom + _padding
 					});
-					$this.outerWidth(_width).outerHeight(_height);
 				}
+				$this.outerWidth(_width).outerHeight(_height);
 			});
 			_config.plugin.oldSection = _config.plugin.currentSection;
 			_config.plugin.direction  = 'refresh';
